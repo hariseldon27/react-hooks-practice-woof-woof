@@ -2,23 +2,33 @@ import React, { useState, useEffect } from "react";
 
 function App() {
   const [dogsInList, setDogsInList] = useState([])
+  const [dogOnShow, setDogOnShow] = useState({})
 
   useEffect(() => {
     fetch("http://localhost:3001/pups")
     .then((r) => r.json())
     .then((data) => setDogsInList(data))
    }, [])
-
+   
+   
    function handleNameClick(e) {
+     const dogToShow = dogsInList.find(dog => dog.id === parseInt(e.target.id,10))
+     console.log(dogsInList)
      console.log(e.target.id)
-     const dogOnShow = dogsInList.filter(dog => dog.id === e.target.id)
-    //  showMeThis(dogOnShow)
-    console.log(dogOnShow)
+     console.log(dogToShow)
+     setDogOnShow(dogToShow)
+    //  debugger
+    // console.log(dogOnShow)
    }
 
-   function showMeThis(thingToShow) {
-     console.log(thingToShow)
-   }
+  //  useEffect(() => {
+  //    console.log("dogOnShow: " + dogOnShow.id)
+  //   //  console.log("dogToShow: " + dogToShow)
+  //  }, [dogOnShow])
+
+  //  function showMeThis(thingToShow) {
+  //    console.log(dogOnShow)
+  //  }
 
   return (
     <div className="App">
@@ -33,7 +43,11 @@ function App() {
       </div>
       <div id="dog-summary-container">
         <h1>DOGGO:</h1>
-        <div id="dog-info"></div>
+        <div id="dog-info">
+        { dogOnShow.name ? dogOnShow.name : "nope"}
+
+
+        </div>
       </div>
     </div>
   );
