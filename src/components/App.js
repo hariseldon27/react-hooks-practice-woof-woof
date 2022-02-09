@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 
 function App() {
   const [dogsInList, setDogsInList] = useState([])
-  const [dogOnShow, setDogOnShow] = useState({})
+  const [dogOnShow, setDogOnShow] = useState({}) //remember if it's a single thing store it as an obj
+  const [isGoodDog, setIsGoodDog] = useState(true)
 
   useEffect(() => {
     fetch("http://localhost:3001/pups")
@@ -12,23 +13,37 @@ function App() {
    
    
    function handleNameClick(e) {
-     const dogToShow = dogsInList.find(dog => dog.id === parseInt(e.target.id,10))
-     console.log(dogsInList)
-     console.log(e.target.id)
-     console.log(dogToShow)
+     const dogToShow = dogsInList.find(dog => dog.id === parseInt(e.target.id,10)) //the type error was that in the db id is num and our obj id was a string
      setDogOnShow(dogToShow)
-    //  debugger
-    // console.log(dogOnShow)
+     setIsGoodDog(dogToShow.isGoodDog)
    }
 
-  //  useEffect(() => {
-  //    console.log("dogOnShow: " + dogOnShow.id)
-  //   //  console.log("dogToShow: " + dogToShow)
-  //  }, [dogOnShow])
+   function handleGoodDogClick(e) {
+    e.stopPropagation();
+    setIsGoodDog(() => !isGoodDog)
+    fetch(`http://localhost:3001/pups/${dogOnShow.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        isGoodDog: !isGoodDog,
+      }),
+    })
+    .then((r) => r.json())
+    .then((updatedDoggy) => onUpdatedDoggy(updatedDoggy))
+  }
 
-  //  function showMeThis(thingToShow) {
-  //    console.log(dogOnShow)
-  //  }
+  function onUpdatedDoggy(updatedItem){
+    const updatedItemList = dogsInList.map((item) => {
+      if(item.id === updatedItem.id) {
+        return updatedItem;
+      } else {
+        return item
+      }
+    });
+    setDogOnShow(updatedItem)
+  }
 
   return (
     <div className="App">
@@ -40,12 +55,15 @@ function App() {
           <span onClick={handleNameClick} id={dog.id} key={dog.id}>{dog.name}</span>
 
         ))}
+        
       </div>
       <div id="dog-summary-container">
         <h1>DOGGO:</h1>
         <div id="dog-info">
         { dogOnShow.name ? dogOnShow.name : "nope"}
-
+        { dogOnShow.image ? <img src={dogOnShow.image} /> : "nope"}
+        <h3>am I a good dog?</h3>
+        <button id="goodDogClicker" onClick={handleGoodDogClick}>  { dogOnShow.isGoodDog ? "Yeah!" : "nope"} </button>
 
         </div>
       </div>
